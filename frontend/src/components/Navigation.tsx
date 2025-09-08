@@ -40,6 +40,7 @@ const Navigation = () => {
     setIsProfileOpen(false);
     setMobileMenuOpen(false);
   };
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent multiple logout calls
@@ -48,7 +49,7 @@ const Navigation = () => {
 
     try {
       await axios.post(
-        "http://localhost:2222/logout",
+        API_BASE_URL+"/logout",
         {},
         { withCredentials: true }
       );

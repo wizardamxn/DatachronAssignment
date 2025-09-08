@@ -33,6 +33,7 @@ interface User {
   email: string;
   createdAt: string;
 }
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const Profile = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("http://localhost:2222/api/books/mybooks", {
+      const res = await axios.get(API_BASE_URL+"/api/books/mybooks", {
         withCredentials: true,
       });
       setBorrowedBooks(res?.data || []);

@@ -1,6 +1,7 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export interface Book {
   _id: string;
@@ -13,7 +14,7 @@ export interface Book {
 interface BookState {
   books: Book[];
   filteredBooks: Book[];
-  myBooks: Book[];        // ✅ new
+  myBooks: Book[]; // ✅ new
   searchTerm: string;
   loading: boolean;
   myBooksLoading: boolean; // ✅ new
@@ -23,8 +24,8 @@ interface BookState {
 const initialState: BookState = {
   books: [],
   filteredBooks: [],
-  myBooks: [],       // ✅ init empty
-  searchTerm: '',
+  myBooks: [], // ✅ init empty
+  searchTerm: "",
   loading: false,
   myBooksLoading: false, // ✅ init false
   error: null,
@@ -32,11 +33,11 @@ const initialState: BookState = {
 
 // Async thunk to fetch books from API
 export const fetchBooks = createAsyncThunk(
-  'books/fetchBooks',
+  "books/fetchBooks",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get('http://localhost:2222/api/books', {
-        withCredentials: true,   // ✅ keep cookies/session
+      const res = await axios.get(API_BASE_URL + "/api/books", {
+        withCredentials: true, // ✅ keep cookies/session
       });
       return res.data as Book[];
     } catch (err: any) {
@@ -46,13 +47,13 @@ export const fetchBooks = createAsyncThunk(
 );
 
 export const borrowBook = createAsyncThunk(
-  'books/borrowBook',
+  "books/borrowBook",
   async (_id: string, { rejectWithValue }) => {
     try {
       const res = await axios.put(
-        `http://localhost:2222/api/books/borrow/${_id}`,
+        `${API_BASE_URL}/api/books/borrow/${_id}`,
         {},
-        { withCredentials: true }  // ✅ keep cookies/session
+        { withCredentials: true } // ✅ keep cookies/session
       );
       return res.data; // may just be a success message
     } catch (err: any) {
@@ -62,13 +63,13 @@ export const borrowBook = createAsyncThunk(
 );
 
 export const returnBook = createAsyncThunk(
-  'books/returnBook',
+  "books/returnBook",
   async (_id: string, { rejectWithValue }) => {
     try {
       const res = await axios.put(
-        `http://localhost:2222/api/books/return/${_id}`,
+        `${API_BASE_URL}/api/books/return/${_id}`,
         {},
-        { withCredentials: true }  // ✅ keep cookies/session
+        { withCredentials: true } // ✅ keep cookies/session
       );
       return res.data;
     } catch (err: any) {
@@ -77,22 +78,21 @@ export const returnBook = createAsyncThunk(
   }
 );
 
-export const myBooks = createAsyncThunk('books/mybooks', 
-  async() => {
-    try{
-      const res = await axios.get('http://localhost:2222/api/books/mybooks')
-      return res.data
-    }
-    catch(err){
-      console.log(err)
-    }
+export const myBooks = createAsyncThunk("books/mybooks", async () => {
+  try {
+    const res = await axios.get(API_BASE_URL + "/api/books/mybooks", {
+      withCredentials: true,
+    });
+    return res.data;
+  } catch (err) {
+    console.log(err);
   }
-)
+});
 
 export const addBook = createAsyncThunk(
   "books/addBook",
   async (bookData: { title: string; author: string; isbn: string }) => {
-    const res = await axios.post("http://localhost:2222/api/books/add", bookData, {
+    const res = await axios.post(API_BASE_URL + "/api/books/add", bookData, {
       withCredentials: true,
     });
     return res.data as Book;
@@ -100,7 +100,7 @@ export const addBook = createAsyncThunk(
 );
 
 const bookSlice = createSlice({
-  name: 'books',
+  name: "books",
   initialState,
   reducers: {
     setSearchTerm: (state, action: PayloadAction<string>) => {
@@ -133,76 +133,72 @@ const bookSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchBooks.fulfilled,
-        (state, action: PayloadAction<Book[]>) => {
-          state.loading = false;
-          state.books = action.payload.filter((book) => book.available); // ✅ filter out unavailable
-          bookSlice.caseReducers.filterBooks(state);
-        }
-      )
+      .addCase(fetchBooks.fulfilled, (state, action: PayloadAction<Book[]>) => {
+        state.loading = false;
+        state.books = action.payload.filter((book) => book.available); // ✅ filter out unavailable
+        bookSlice.caseReducers.filterBooks(state);
+      })
       .addCase(fetchBooks.rejected, (state, action: any) => {
         state.loading = false;
         state.error = action.payload;
       })
-      builder
-  // fetchBooks cases same as before ...
+      // fetchBooks cases same as before ...
 
-  .addCase(borrowBook.fulfilled, (state, action) => {
-    const bookId = action.meta.arg as string;
+      .addCase(borrowBook.fulfilled, (state, action) => {
+        const bookId = action.meta.arg as string;
 
-    // remove from available books
-    state.books = state.books
-      .map((book) =>
-        book._id === bookId ? { ...book, available: false } : book
-      )
-      .filter((book) => book.available);
+        // remove from available books
+        state.books = state.books
+          .map((book) =>
+            book._id === bookId ? { ...book, available: false } : book
+          )
+          .filter((book) => book.available);
 
-    // also add to myBooks (if backend returned full book, use that instead)
-    if (action.payload && typeof action.payload === 'object') {
-      state.myBooks.push(action.payload as Book);
-    }
+        // also add to myBooks (if backend returned full book, use that instead)
+        if (action.payload && typeof action.payload === "object") {
+          state.myBooks.push(action.payload as Book);
+        }
 
-    bookSlice.caseReducers.filterBooks(state);
-  })
+        bookSlice.caseReducers.filterBooks(state);
+      })
 
-  .addCase(returnBook.fulfilled, (state, action) => {
-    const bookId = action.meta.arg as string;
+      .addCase(returnBook.fulfilled, (state, action) => {
+        const bookId = action.meta.arg as string;
 
-    // remove from myBooks
-    state.myBooks = state.myBooks.filter((b) => b._id !== bookId);
+        // remove from myBooks
+        state.myBooks = state.myBooks.filter((b) => b._id !== bookId);
 
-    // add back to available books
-    if (action.payload && typeof action.payload === 'object') {
-      state.books.push(action.payload as Book);
-    } else {
-      state.books.push({
-        _id: bookId,
-        title: 'Unknown',
-        author: 'Unknown',
-        isbn: '',
-        available: true,
-      });
-    }
+        // add back to available books
+        if (action.payload && typeof action.payload === "object") {
+          state.books.push(action.payload as Book);
+        } else {
+          state.books.push({
+            _id: bookId,
+            title: "Unknown",
+            author: "Unknown",
+            isbn: "",
+            available: true,
+          });
+        }
 
-    bookSlice.caseReducers.filterBooks(state);
-  })
+        bookSlice.caseReducers.filterBooks(state);
+      })
 
-  // ✅ myBooks thunk
-  .addCase(myBooks.pending, (state) => {
-    state.myBooksLoading = true;
-    state.error = null;
-  })
-  .addCase(myBooks.fulfilled, (state, action: PayloadAction<Book[]>) => {
-    state.myBooksLoading = false;
-    state.myBooks = action.payload;
-  })
-  .addCase(myBooks.rejected, (state, action: any) => {
-    state.myBooksLoading = false;
-    state.error = action.payload;
-  })
+      // ✅ myBooks thunk
+      .addCase(myBooks.pending, (state) => {
+        state.myBooksLoading = true;
+        state.error = null;
+      })
+      .addCase(myBooks.fulfilled, (state, action: PayloadAction<Book[]>) => {
+        state.myBooksLoading = false;
+        state.myBooks = action.payload;
+      })
+      .addCase(myBooks.rejected, (state, action: any) => {
+        state.myBooksLoading = false;
+        state.error = action.payload;
+      })
 
-   .addCase(addBook.pending, (state) => {
+      .addCase(addBook.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
@@ -215,9 +211,7 @@ const bookSlice = createSlice({
         state.error = action.error.message || "Failed to add book";
       });
   },
-      
-  },
-);
+});
 
 export const { setSearchTerm, filterBooks, setLoading, setError } =
   bookSlice.actions;

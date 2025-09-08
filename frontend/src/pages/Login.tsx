@@ -16,6 +16,7 @@ interface LoginResponse {
   token: string;
   message?: string;
 }
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const Login = () => {
   const [email, setEmail] = useState("amank225566@gmail.com");
@@ -41,7 +42,7 @@ export const Login = () => {
 
     try {
       const res = await axios.post<LoginResponse>(
-        "http://localhost:2222/login",
+      API_BASE_URL+ "/login",
         { email, password },
         { withCredentials: true }
       );

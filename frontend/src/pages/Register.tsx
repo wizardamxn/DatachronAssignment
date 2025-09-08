@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ export const Register = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:2222/register",
+        API_BASE_URL+"/register",
         {
           fullName: formData.fullName,
           email: formData.email,

@@ -14,11 +14,7 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  // const getBooks = async () => {
-  //   const res = await axios.get("http://localhost:2222/api/books", {});
-
-  //   dispatch(fetchBooks(res.data));
-  // };
+  
   useEffect(() => {
     dispatch(fetchBooks())
     }, [dispatch]);

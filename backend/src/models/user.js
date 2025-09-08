@@ -46,7 +46,8 @@ userSchema.methods.getJwtToken = function () {
       _id: this._id
     }
     ,
-    'CHINGCHONG',
+    process.env.JWT_SECRET
+    ,
     {
       expiresIn: "1h"
     }
