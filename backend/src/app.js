@@ -11,11 +11,26 @@ const dotenv = require('dotenv')
 app.use(cookieparser())
 
 dotenv.config();
-const allowedOrigins = ["http://localhost:8080", "http://127.0.0.1:8080", process.env.FRONTEND_URL];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://localhost:8080",
+  "https://datachron-assignment-seven.vercel.app",  // prod
+  "https://datachron-assignment-git-main-wizardamxns-projects.vercel.app",// preview
+  process.env.FRONTEND_URL,
+
+
+];
 
 app.use(cors({
-  origin: "http://localhost:8080", // your frontend
-  credentials: true
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
 
 
