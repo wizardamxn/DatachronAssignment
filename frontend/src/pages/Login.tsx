@@ -21,9 +21,9 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 export const Login = () => {
   axios.defaults.withCredentials = true;
 
-  const [email, setEmail] = useState("amank225566@gmail.com");
+  const [email, setEmail] = useState("test@gmail.com");
   const navigate = useNavigate();
-  const [password, setPassword] = useState("Aman11Aman!!");
+  const [password, setPassword] = useState("Teset!!!Test13");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
