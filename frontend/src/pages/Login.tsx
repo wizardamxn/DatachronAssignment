@@ -19,6 +19,8 @@ interface LoginResponse {
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const Login = () => {
+  axios.defaults.withCredentials = true;
+
   const [email, setEmail] = useState("amank225566@gmail.com");
   const navigate = useNavigate();
   const [password, setPassword] = useState("Aman11Aman!!");
@@ -53,7 +55,7 @@ export const Login = () => {
         description: `Welcome back ${email}`,
       });
 
-      const userData = await axios.get("http://localhost:2222/profile", {
+      const userData = await axios.get(API_BASE_URL + "/profile", {
         withCredentials: true,
       });
       dispatch(addUser(userData.data));

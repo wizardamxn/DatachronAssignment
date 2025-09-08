@@ -19,9 +19,16 @@ authRouter.post('/login', async (req, res) => {
         else {
             const jwttoken = user.getJwtToken()
             console.log(jwttoken)
-            res.cookie('token', jwttoken,{
-               maxAge: 60 * 60 * 1000
-            })
+            // res.cookie('token', jwttoken,{
+            //    maxAge: 60 * 60 * 1000
+            // })
+            // Make sure your cookie settings work for production domain
+            res.cookie('token', jwttoken, {
+                httpOnly: true,
+                secure: true, // Must be true for HTTPS (Render uses HTTPS)
+                sameSite: 'none', // Important for cross-origin requests
+                path: '/' // Make sure path is correct
+            });
             res.send("LOGGED")
         }
     }
